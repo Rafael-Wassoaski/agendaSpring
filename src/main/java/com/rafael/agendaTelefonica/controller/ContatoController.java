@@ -4,8 +4,6 @@ import com.rafael.agendaTelefonica.entity.ContatoEntity;
 import com.rafael.agendaTelefonica.repository.ContatoRepo;
 import com.rafael.agendaTelefonica.service.ContatoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +33,7 @@ public class ContatoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ContatoEntity createContato(@RequestBody ContatoEntity contato) {
-        return contatoRepo.save(contato);
+        return contatoService.save(contato);
     }
 
     @PutMapping("/{id}")

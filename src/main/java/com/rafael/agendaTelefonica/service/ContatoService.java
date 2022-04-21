@@ -1,6 +1,7 @@
 package com.rafael.agendaTelefonica.service;
 
 import com.rafael.agendaTelefonica.entity.ContatoEntity;
+import com.rafael.agendaTelefonica.exceptions.UnprocessableEntityException;
 import com.rafael.agendaTelefonica.repository.ContatoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -11,12 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @Service
 public class ContatoService {
@@ -45,5 +45,20 @@ public class ContatoService {
         contatoComLink.add(Link.of("https://api.whatsapp.com/send?phone=" + contato.getTelefone()).withRel("whatsAppLink"));
 
         return contatoComLink;
+    }
+
+    public ContatoEntity save(ContatoEntity contato){
+        if(contato.getNome().isEmpty()){
+            throw new UnprocessableEntityException("O contato não pode ter um nome vazio");
+        }
+
+        Pattern phonePattern = Pattern.compile("^\\s*(\\d{2}|\\d{0})[-. ]?(\\d{5}|\\d{4})[-. ]?(\\d{4})[-. ]?\\s*$");
+        Matcher matcher = phonePattern.matcher(contato.getTelefone());
+
+        if(!matcher.matches()){
+            throw new UnprocessableEntityException("O telefone do contato deve obedecer a um dos seguintes padrões 12 1234 1234 | 12 12345 1234 | 12345 1234 | 1234 1234");
+        }
+
+        return contatoRepo.save(contato);
     }
 }
