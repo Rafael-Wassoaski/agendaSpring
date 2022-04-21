@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,25 +23,27 @@ public class ContatoService {
     @Autowired
     private ContatoRepo contatoRepo;
 
-    public ContatoEntity getById(@PathVariable Integer id) {
+    public EntityModel<ContatoEntity> getById(@PathVariable Integer id) {
         ContatoEntity contato = contatoRepo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contato com esse id não foi encotrado"));
 
         return this.addWhatsAppLink(contato);
     }
 
-    public List<ContatoEntity> getByFilter(ContatoEntity filtro) {
+    public List<EntityModel<ContatoEntity>> getByFilter(ContatoEntity filtro) {
         ExampleMatcher matcher = ExampleMatcher.matching().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example example = Example.of(filtro, matcher);
 
         Stream<ContatoEntity> contatosStream = contatoRepo.findAll(example).stream();
-        List<ContatoEntity> contatos = contatosStream.map(contato -> this.addWhatsAppLink(contato)).collect(Collectors.toList());
+        List<EntityModel<ContatoEntity>> contatos = contatosStream.map(contato -> this.addWhatsAppLink(contato)).collect(Collectors.toList());
 
         return contatos;
     }
 
-    private ContatoEntity addWhatsAppLink(ContatoEntity contato) {
-        EntityModel<ContatoEntity> contatoComLink = EntityModel.of(contato, linkTo("https://api.whatsapp.com/send?phone=" + contato.getTelefone()).withRel("whatsAppLink"));
+    private EntityModel<ContatoEntity> addWhatsAppLink(ContatoEntity contato) {
+        EntityModel<ContatoEntity> contatoComLink = EntityModel.of(contato);
 
-        return contatoComLink.getContent();
+        contatoComLink.add(Link.of("https://api.whatsapp.com/send?phone=" + contato.getTelefone()).withRel("whatsAppLink"));
+
+        return contatoComLink;
     }
 }

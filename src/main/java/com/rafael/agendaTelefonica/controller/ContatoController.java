@@ -6,6 +6,7 @@ import com.rafael.agendaTelefonica.service.ContatoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,12 +23,12 @@ public class ContatoController {
     private ContatoService contatoService;
 
     @GetMapping("/{id}")
-    public ContatoEntity getById(@PathVariable Integer id) {
+    public EntityModel<ContatoEntity> getById(@PathVariable Integer id) {
         return contatoService.getById(id);
     }
 
     @GetMapping
-    public List<ContatoEntity> getByFilter(ContatoEntity filtro) {
+    public List<EntityModel<ContatoEntity>> getByFilter(ContatoEntity filtro) {
         return contatoService.getByFilter(filtro);
     }
 
